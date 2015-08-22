@@ -7,43 +7,55 @@ var mysql = require('./dbConn.js');
 
 var count = 0;
 var client = {};
+function sleep(m){
+	var start = new Date().getTime();
+	for(var i = 0 ; i < 1e7 ; i++){
+		if(new Date().getTime()-start > m)
+			{break;}
+	}
+}
 
 var server = ws.createServer(function (connection){
     console.log("Test for connect!")
-    client[count] = connection;
-    console.log("id = " + count.toString());
-    connection.sendText(count.toString());
-    count = count + 1;
+
     connection.on("text",function(str){
         console.log(str);
 	var x=200,y=300;
 	if(str[0]=="@"){
-		str[0]==" ";
-		connection.sendText(str+" "+x.toString()+" "+y.toString());
-		console.log("send");
+		console.log("send id");
+		var sql = 'INSERT INTO playerInfo SET name= "'+str+'" ,xpos='+x+' ,ypos='+y;
+		mysql.getInsert(sql);
+		sleep(1000);
+		var sql = 'SELECT * FROM playerInfo ORDER BY id DESC LIMIT 1';
+		var db = mysql.getConn();
+		db.query(sql, function(err, results) {
+			if(err) console.log('mysql getQuery error');
+			console.log(results);
+			connection.sendText(results[0].id.toString()+" "+results[0].xpos.toString()+" "+results[0].ypos.toString());
+		});
+		db.end();
+	}
+	else if(str[0]=="$"){
+
+		var sql = 'SELECT * FROM playerInfo';
+		var db = mysql.getConn();
+		db.query(sql, function(err, results) {
+			if(err) console.log('mysql getQuery error');
+			//console.log(results);
+			var arr = [];			
+			for(var i = 0 ; i < results.length ;i++){
+				arr.push({
+					"id":results[i].id.toString(),
+					"x":results[i].xpos.toString(),
+					"y":results[i].ypos.toString()				
+				});
+			}
+			connection.sendText(JSON.stringify(arr));
+		});
+		db.end();
 	}
      	//broadcast(str);
 
-	var sql = 'SELECT name, xpos, ypos FROM playerInfo';
-	var db = mysql.getConn();
-	db.query(sql, function(err, results) {
-		if(err) console.log('mysql getQuery error');
-		console.log(results);
-		connection.sendText(results);
-	});
-	db.end();
-
-    var sql = 'INSERT INTO playerInfo SET name='+'"'+str+'" ,xpos='+x+' ,ypos='+y;
-	mysql.getInsert(sql);
-	
-	var sql = 'SELECT name, xpos, ypos FROM playerInfo';
-	var db = mysql.getConn();
-	db.query(sql, function(err, results) {
-		if(err) console.log('mysql getQuery error');
-		console.log(results);
-		connection.sendText(results);
-	});
-	db.end();
     })
     connection.on("close",function (code, reason){
 	count = count -1;
