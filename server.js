@@ -5,8 +5,9 @@ var path = require('path');
 var ws = require('./node_modules/nodejs-websocket')
 var mysql = require('./dbConn.js');
 
+var lasCon = [];
+for(var i=0 ; i<2000 ; i++) lasCon.push(-1);
 var count = 0;
-var client = {};
 function sleep(m){
 	var start = new Date().getTime();
 	for(var i = 0 ; i < 1e7 ; i++){
@@ -17,15 +18,14 @@ function sleep(m){
 
 var server = ws.createServer(function (connection){
     console.log("Test for connect!")
-
-    connection.on("text",function(str){
-        console.log(str);
+    
+	connection.on("text",function(str){
+    console.log(str);
 	var x=200,y=200;
 	if(str[0]=="@"){
 		console.log("send id");
 		var sql = 'INSERT INTO playerInfo SET name= "'+str+'" ,xpos='+x+' ,ypos='+y;
 		mysql.getInsert(sql);
-		sleep(1000);
 		y += 20;
 		var sql = 'SELECT * FROM playerInfo ORDER BY id DESC LIMIT 1';
 		var db = mysql.getConn();
@@ -43,7 +43,27 @@ var server = ws.createServer(function (connection){
 		db.end();
 	}
 	else if(str[0]=="$"){
+		var id = "",x="",y="" , i = 1;
+		while(str[i]!=" "){
+			id+=str[i];
+			i++;
+		}
+		i++;
+		while(str[i]!=" "){
+			x+=str[i];
+			i++
+		}
+		i++;
+		while(str[i]!=" "){
+			y+=str[i];
+			i++
+		}
+		lasCon[parseInt(id)] = new Date().getTime();
+		console.log(lasCon[parseInt(id)]);
+		var sql = 'UPDATE playerInfo SET xpos='+parseInt(x)+', ypos='+parseInt(y)+' WHERE id='+parseInt(id);
+		mysql.getUpdate(sql);
 
+		console.log("Transfering " + str);
 		var sql = 'SELECT * FROM playerInfo';
 		var db = mysql.getConn();
 		db.query(sql, function(err, results) {
@@ -60,30 +80,25 @@ var server = ws.createServer(function (connection){
 			connection.sendText(JSON.stringify(arr));
 		});
 		db.end();
+		count++;
+		if(count%100==0){
+			console.log("100 GET!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+			for(var i = 0; i<2000 ; i++){
+				if(lasCon[i]!= -1 && ( new Date().getTime()) - lasCon[i] > 200){
+					console.log( i.toString() +" is disconnected! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+					var sql = 'DELETE FROM playerInfo WHERE id='+i;
+					mysql.getDelete(sql);
+					lasCon[i] = -1;
+					connection.sendText(i.toString());
+				}
+			}	
+		}
 	}
      	//broadcast(str);
 
     })
     connection.on("close",function (code, reason){
-	count = count -1;
-	console.log(" is disconnected!"+code+" "+reason);
-	var flag = 0 ;
-	console.log(server.connections.length);
-	for(var j = 0 ; j < count + 1 ; j++){
-		for(var i= 0; i<server.connections.length;i++){
-			if(server.connections[i] == client[j]){
-				flag = 1;
-				console.log("flag = 1 ;")
-				console.log(i+" = "+j);
-			}
-		}
-		if (flag == 0){
-			console.log("client " + j + " is disconnected.");
-			break;
-		}
-		else {flag = 0;}
-	}
-    })
+	})
 })
 server.listen(8000)
 
