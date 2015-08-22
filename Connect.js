@@ -9,9 +9,12 @@ connection.onopen = function(){
     connection.onmessage = function(e){
 		MyID = e.data;
 		console.log("onmessage: "+MyID);
-		//if(e.data=="[")	
-		//getData(e.data);
-		GETDATA(e.data);
+		if(e.data[0]=="["){
+			GETDATA(e.data);
+		}
+		else{
+			RMID(e.data);
+		}
     }
     connection.onclose = function(){
 		console.log("close");
