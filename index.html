@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ChatM</title>
+        <script src="Connect.js"></script>
+        <script src="UI/processing.min.js"></script>
+	<script>
+		var inputUID = prompt("Please enter your name: ");
+		var userid = new CustomEvent("Mes",{
+			'detail': "@"+inputUID
+		});
+		window.dispatchEvent(userid);
+		
+	</script>	
+	       <script type="text/processing" data-processing-target="mycanvas">
+    		float radius = 50.0;
+            int X, Y;
+            int delay = 16;
+            boolean keys = [false, false, false, false]; // left, up, right, down
+			var myId = inputUID;
+			console.log("AAAAA "+myId);
+			var sizeX = 1200, sizeY = 800;
+			
+			var number = 0; // index number
+
+			var lines = [];
+			var vlines = [];
+			var hlines = [];
+			var players = [];
+			var ids = [];
+			
+			function passData(MyID){
+				//DataString=MyID;
+				var i = 0;
+				while(MyID[i]!="]"){
+					if(MyID[i]=="{"){
+					
+						while(MyID[i]!="@"){
+							i++;
+						}
+						i++;
+						var id = "";
+						while(MyID[i]!="'"){
+							id+=MyID[i];
+						}
+						
+						
+						while(MyID[i]!=":"){
+							i++;
+						}
+						i+=2;
+						var xpos = "";
+						while(MyID[i]!=","){
+							xpos+=MyID[i];
+						}
+						
+						while(MyID[i]!=":"){
+							i++;
+						}
+						i+=2;
+						var ypos = "";
+						while(MyID[i]!=" "){
+							ypos+=MyID[i];
+						}
+						
+						addPlayer(ParseInt(xpos), ParseInt(ypos), id);
+					}
+					i++;
+				}
+			}
+			function getData(str){
+				var arr = JSON.parse(str);
+				for(int i = 0; i < arr.length; i++){
+					addPlayer(arr[i].xpos, arr[i].ypos, arr[i].name);
+				}
+			}
+			function addPlayer(_x, _y, _id){
+				var player = new Object();
+				player.x = _x;
+				player.y = _y;
+				player.id = _id;
+				
+				players.push(player);
+				ids.push(_id);
+			}
+		
+			
+            void setup(){
+            	//size( window.innerWidth*0.97, window.innerHeight*0.80 );
+            	size(sizeX, sizeY);
+				strokeWeight( 10 );
+            	frameRate( 15 );
+            	X = sizeX / 2;
+            	Y = sizeY / 2;
+				
+				
+				//addPlayer(X, Y, myId);
+				
+				addVline(100, 200, 600);
+				addVline(1100, 200, 600);
+				addHline(200, 1000, 100);
+				addHline(200, 1000, 700);
+            }
+            
+            void draw(){  
+				background(200, 200, 200);
+				
+				number = jQuery.inArray(myId, ids);
+
+				var deltaX = 0, deltaY = 0;
+				
+	            if(keys[0])	deltaX -= 10;
+	            if(keys[1])	deltaY -= 10;
+	            if(keys[2])	deltaX += 10;
+	            if(keys[3])	deltaY += 10;
+				
+				boolean pass = true;
+				for(int i = 0; i < vlines.length; i++){
+					pass = !checkVlineCollision(vlines[i], players[number].x + deltaX, players[number].y + deltaY, radius);
+					if(!pass) break;
+				}
+				if(pass){
+					for(int i = 0; i < hlines.length; i++){
+						pass = !checkHlineCollision(hlines[i], players[number].x + deltaX, players[number].y + deltaY, radius);
+						if(!pass) break;
+					}
+				}
+				if(pass){
+					players[number].x += deltaX;
+					players[number].y += deltaY;
+				}
+                
+				X = players[number].x - sizeX/2;
+				Y = players[number].y - sizeY/2;
+				
+				for(int i = 0; i < vlines.length; i++){
+					stroke(0);
+					line(vlines[i].x - X, vlines[i].y1 - Y, vlines[i].x - X, vlines[i].y2 - Y);
+				}
+				for(int i = 0; i < hlines.length; i++){
+					stroke(0);
+					line(hlines[i].x1 - X, hlines[i].y - Y, hlines[i].x2 - X, hlines[i].y - Y);
+				}
+				
+				for(int i = 0; i < players.length; i++){
+					int tempX = players[i].x - X;
+					int tempY = players[i].y - Y;
+					
+					fill( 0, 121, 184 );
+			  
+					// Set stroke-color white
+					stroke(255); 
+			  
+					// Draw circle
+					ellipse( tempX, tempY, radius, radius );
+					
+					PFont font;
+					font = loadFont("FFScala.ttf"); 
+					textFont(font); 
+					text("position: " + players[i].x + "," + players[i].y, tempX, tempY - 50); 
+				}
+            }
+            window.addEventListener("keydown", keysPressed, false);
+            window.addEventListener("keyup", keysReleased, false);            
+             
+            function keysPressed(e) {
+                // store an entry for every key pressed
+                if(e.keyCode > 36 && e.keyCode < 41)
+            		keys[e.keyCode - 37] = true;
+                if(e.keyCode == 13)	enterPressed();
+            }
+             
+            function keysReleased(e) {
+                // mark keys that were released
+				if(e.keyCode > 36 && e.keyCode < 41)
+					keys[e.keyCode - 37] = false;
+            }
+			boolean updatePlayer(_x, var _y, var _id){
+				int index = jQuery.inArray(_id, ids);
+				if(index > -1){
+					players[index].x = _x;
+					players[index].y = _y;
+					return true;
+				}
+				return false;
+			}
+			boolean removePlayer(var _id){
+				int index = jQuery.inArray(_id, ids);
+				if(index > -1){
+					ids.splice(index, 1);
+					players.splice(index, 1);
+					return true;
+				}
+				return false;
+			}
+			function addLine(var _x1, var _y1, var _x2, var _y2){
+				var line = new Object();
+				line.x1 = _x1;
+				line.y1 = _y1;
+				line.x2 = _x2;
+				line.y2 - _y2;
+				line.dis = Math.pow(Math.pow(line.x1 - line.x2, 2) + Math.pow(line.y1 - line.y2, 2), 0.5);
+				
+				lines.push(line);
+			}
+			function addVline(var _x, var _y1, var _y2){
+				var vline = new Object();
+				vline.x = _x;
+				if(_y1 <= _y2){
+					vline.y1 = _y1;
+					vline.y2 = _y2;
+				}
+				else{
+					vline.y1 = _y2;
+					vline.y2 = _y1;
+				}
+				vlines.push(vline);
+			}
+			function addHline(var _x1, var _x2, var _y){
+				var hline = new Object();
+				if(_x1 <= _x2){
+					hline.x1 = _x1;
+					hline.x2 = _x2;
+				}
+				else{
+					hline.x1 = _x2;
+					hline.x2 = _x1;
+				}
+				hline.y = _y;
+				
+				hlines.push(hline);
+			}
+			boolean checkVlineCollision(var vline, var _x, var _y, var radius){ // return true if collision
+				if(_y <= vline.y1){
+					if(radius < distance(_x, _y, vline.x, vline.y1))	return false;
+					return true;
+				}
+				else if(_y >= vline.y2){
+					if(radius < distance(_x, _y, vline.x, vline.y2))	return false;
+					return true;
+				}
+				else{
+					if(radius < Math.abs(_x - vline.x))	return false;
+					return true;
+				}
+			}
+			boolean checkHlineCollision(var hline, var _x, var _y, var radius){
+				if(_x <= hline.x1){
+					if(radius < distance(_x, _y, hline.x1, hline.y))	return false;
+					return true;
+				}
+				else if(_x >= hline.x2){
+					if(radius < distance(_x, _y, hline.x2, hline.y))	return false;
+					return true;
+				}
+				else{
+					if(radius < Math.abs(_y - hline.y))	return false;
+					return true;
+				}
+			}
+			double distance(var x1, var y1, var x2, var y2){
+				return Math.pow(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2), 0.5);
+			}
+        </script>  
+        <script src="Modules.js"></script>
+        <link type="text/css" rel="stylesheet" href="UI/materialize.min.css"  media="screen,projection">
+        
+    </head>
+    <body>
+        <canvas id="mycanvas"></canvas>
+        <!-- <script type="text/javascript" src="FB.js"></script> --!>
+	<script type="text/javascript" src="UI/jquery-2.1.4.min.js"></script>
+        <script type="text/javascript" src="UI/materialize.min.js"></script>
+		<div class="row">
+			<form class="col s12">
+				<div class="row">
+					<div class="input-field col s6" style="left:200px;">
+					<textarea id="message" class="materialize-textarea" style="left:200px; width:700px;"></textarea>
+					<label>Message</label>
+					</div>
+				</div>
+			</form>
+		</div>
+<!--		<fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+</fb:login-button> --!>
+    </body>
+</html>

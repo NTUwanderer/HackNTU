@@ -1,0 +1,71 @@
+<script src="processing.js"></script>
+	<script type="text/processing" data-processing-target="mycanvas">
+
+float radius = 50.0;
+int X, Y;
+int delay = 16;
+boolean keys = [false, false, false, false]; // left, up, right, down
+int x = [500, 100, 100, 900, 900], y = [500, 100, 900, 100, 900];
+int sizeX = 1500, sizeY = 1000;
+void setup()
+{
+	size( sizeX, sizeY );
+	strokeWeight( 10 );
+	frameRate( 15 );
+}
+
+void draw(){
+	if(keys[0])	x[0]-=10;
+	if(keys[1])	y[0]-=10;
+	if(keys[2])	x[0]+=10;
+	if(keys[3])	y[0]+=10;
+	
+	radius = radius + sin( frameCount / 4 );
+	
+	X = x[0] - sizeX/2;
+	Y = y[0] - sizeY/2;
+  // Fill canvas grey
+	background( 100 );
+	for(int i=0;i<5;i++){
+		// Set fill-color to blue
+		int tempX = x[i] - X;
+		int tempY = y[i] - Y;
+		
+		fill( 0, 121, 184 );
+  
+		// Set stroke-color white
+		stroke(255); 
+  
+		// Draw circle
+		ellipse( tempX, tempY, radius, radius );
+		
+		PFont font;
+		font = loadFont("FFScala.ttf"); 
+		textFont(font); 
+		text("position: " + x[i] + "," + y[i], tempX, tempY - 50); 
+	}
+  
+  
+	
+
+}
+window.addEventListener("keydown", keysPressed, false);
+window.addEventListener("keyup", keysReleased, false);
+
+function keysPressed(e) {
+    // store an entry for every key pressed
+    if(e.keyCode > 36 && e.keyCode < 41)
+		keys[e.keyCode - 37] = true;
+    else if(e.keyCode == 13)	enterPressed();
+}
+
+function keysReleased(e) {
+    // mark keys that were released
+    keys[e.keyCode - 37] = false;
+}
+function enterPressed(){
+	//to be implemented
+}
+
+	</script>
+<canvas id="mycanvas"></canvas>
