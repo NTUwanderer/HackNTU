@@ -20,18 +20,25 @@ var server = ws.createServer(function (connection){
 
     connection.on("text",function(str){
         console.log(str);
-	var x=200,y=300;
+	var x=200,y=200;
 	if(str[0]=="@"){
 		console.log("send id");
 		var sql = 'INSERT INTO playerInfo SET name= "'+str+'" ,xpos='+x+' ,ypos='+y;
 		mysql.getInsert(sql);
 		sleep(1000);
+		y += 20;
 		var sql = 'SELECT * FROM playerInfo ORDER BY id DESC LIMIT 1';
 		var db = mysql.getConn();
 		db.query(sql, function(err, results) {
 			if(err) console.log('mysql getQuery error');
 			console.log(results);
-			connection.sendText(results[0].id.toString()+" "+results[0].xpos.toString()+" "+results[0].ypos.toString());
+			var tok = [];
+			tok.push({
+				"id" : results[0].id.toString(),
+				"x" : results[0].xpos.toString(),
+				"y" : results[0].ypos.toString()
+			});
+			connection.sendText(JSON.stringify(tok));
 		});
 		db.end();
 	}

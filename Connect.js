@@ -7,12 +7,15 @@ connection.onopen = function(){
         connection.send(event.detail);
     });
     connection.onmessage = function(e){
-	MyID = e.data;
-	console.log(MyID);
+		MyID = e.data;
+		console.log("onmessage: "+MyID);
+		//if(e.data=="[")	
+		//getData(e.data);
+		GETDATA(e.data);
     }
     connection.onclose = function(){
-	console.log("close");
-	connection.send(MyID);
+		console.log("close");
+		connection.send(MyID);
 	}
 }
 var t = {}

@@ -4,20 +4,26 @@
         <title>ChatM</title>
         <script src="Connect.js"></script>
         <script src="UI/processing.min.js"></script>
-	<script>
-		var inputUID = prompt("Please enter your name: ");
-		var userid = new CustomEvent("Mes",{
-			'detail': "@"+inputUID
-		});
-		window.dispatchEvent(userid);
-		
-	</script>	
+		<script>
+			var inputUID = prompt("Please enter your name: ");
+			var userid = new CustomEvent("Mes",{
+				'detail': "@"+inputUID
+			});
+			window.dispatchEvent(userid);
+			var DataString ;				
+			function GETDATA(str){
+					console.log("GETDATA started.");
+					DataString = str;
+					console.log(str);
+			}
+		</script>	
 	       <script type="text/processing" data-processing-target="mycanvas">
     		float radius = 50.0;
             int X, Y;
             int delay = 16;
+			boolean first = true;
             boolean keys = [false, false, false, false]; // left, up, right, down
-			var myId = inputUID;
+			var myId;
 			console.log("AAAAA "+myId);
 			var sizeX = 1200, sizeY = 800;
 			
@@ -28,53 +34,38 @@
 			var hlines = [];
 			var players = [];
 			var ids = [];
-			/*
-			function passData(MyID){
-				//DataString=MyID;
-				var i = 0;
-				while(MyID[i]!="]"){
-					if(MyID[i]=="{"){
-					
-						while(MyID[i]!="@"){
-							i++;
-						}
-						i++;
-						var id = "";
-						while(MyID[i]!="'"){
-							id+=MyID[i];
-						}
-						
-						
-						while(MyID[i]!=":"){
-							i++;
-						}
-						i+=2;
-						var xpos = "";
-						while(MyID[i]!=","){
-							xpos+=MyID[i];
-						}
-						
-						while(MyID[i]!=":"){
-							i++;
-						}
-						i+=2;
-						var ypos = "";
-						while(MyID[i]!=" "){
-							ypos+=MyID[i];
-						}
-						
-						addPlayer(ParseInt(xpos), ParseInt(ypos), id);
-					}
+
+			function GETMYID(str){
+				console.log(str);
+				var i=0;
+				var id="",x="",y="";
+				while(str[i]!=" "){
+					id+=str[i];
 					i++;
 				}
-			}*/
-			function getData(str){
+				i++;
+				while(str[i]!=" "){
+					x+=str[i];
+					i++;
+				}
+				i++;
+				while(str[i]!=" "){
+					y+=str[i];
+					i++;
+				}
+				console.log("id is "+id+" "+x+" "+y);
+				myId = id;
+				addPlayer(parseInt(x), parseInt(y), id);
+			}
+
+/*			function getData(str){
+				console.log("getData started.");
 				var arr = JSON.parse(str);
 				for(int i = 0; i < arr.length; i++){
 					addPlayer(arr[i].xpos, arr[i].ypos, arr[i].name);
 				}
 			}
-			function addPlayer(_x, _y, _id){
+*/			function addPlayer(_x, _y, _id){
 				var player = new Object();
 				player.x = _x;
 				player.y = _y;
@@ -87,7 +78,9 @@
 			
             void setup(){
             	//size( window.innerWidth*0.97, window.innerHeight*0.80 );
-            	size(sizeX, sizeY);
+            	sleep(2000);
+				console.log("DataString: "+DataString);
+				size(sizeX, sizeY);
 				strokeWeight( 10 );
             	frameRate( 15 );
             	X = sizeX / 2;
@@ -103,9 +96,32 @@
             }
             
             void draw(){  
+				if(first){
+					console.log("DataString: "+DataString);
+					console.log("DRAW!");
+					
+					var obj = JSON.parse(DataString);
+					addPlayer(parseInt(obj[0].x), parseInt(obj[0].y), obj[0].id);
+					console.log("THIS: "+obj[0].x+" "+obj[0].y+" "+ obj[0].id);
+					myId = obj[0].id;
+
+					first = false;
+				}
+				else{
+					var obj = JSON.parse(DataString);
+					for(var i=0;i<obj.length;i++){
+						if( !updatePlayer(parseInt(obj[i].x), parseInt(obj[i].y), obj[i].id) ){
+							addPlayer(parseInt(obj[i].x), parseInt(obj[i].y), obj[i].id);
+						}
+					}
+					
+				}
 				background(200, 200, 200);
+				var temp = jQuery.inArray(myId, ids);
 				
-				number = jQuery.inArray(myId, ids);
+				if(temp > -1)	number = temp;
+				console.log("temp: "+temp);
+				console.log("myId: "+myId);
 
 				var deltaX = 0, deltaY = 0;
 				
@@ -129,7 +145,7 @@
 					players[number].x += deltaX;
 					players[number].y += deltaY;
 				}
-                
+               
 				X = players[number].x - sizeX/2;
 				Y = players[number].y - sizeY/2;
 				
@@ -157,8 +173,13 @@
 					PFont font;
 					font = loadFont("FFScala.ttf"); 
 					textFont(font); 
-					text("position: " + players[i].x + "," + players[i].y, tempX, tempY - 50); 
+					text("position: " + players[i].x + "," + players[i].y, tempX, tempY + 50); 
 				}
+				
+				var BACK = new CustomEvent("Mes",{
+					'detail': "$" + myId +" "+ players[number].x +" "+ players[number].y  
+				});
+				window.dispatchEvent(BACK);
             }
             window.addEventListener("keydown", keysPressed, false);
             window.addEventListener("keyup", keysReleased, false);            
@@ -175,7 +196,7 @@
 				if(e.keyCode > 36 && e.keyCode < 41)
 					keys[e.keyCode - 37] = false;
             }
-			boolean updatePlayer(_x, var _y, var _id){
+			boolean updatePlayer(_x, _y,  _id){
 				int index = jQuery.inArray(_id, ids);
 				if(index > -1){
 					players[index].x = _x;
@@ -184,7 +205,7 @@
 				}
 				return false;
 			}
-			boolean removePlayer(var _id){
+			boolean removePlayer(_id){
 				int index = jQuery.inArray(_id, ids);
 				if(index > -1){
 					ids.splice(index, 1);
@@ -193,7 +214,7 @@
 				}
 				return false;
 			}
-			function addLine(var _x1, var _y1, var _x2, var _y2){
+			function addLine(_x1, _y1, _x2, _y2){
 				var line = new Object();
 				line.x1 = _x1;
 				line.y1 = _y1;
@@ -203,7 +224,7 @@
 				
 				lines.push(line);
 			}
-			function addVline(var _x, var _y1, var _y2){
+			function addVline(_x, _y1, _y2){
 				var vline = new Object();
 				vline.x = _x;
 				if(_y1 <= _y2){
@@ -216,7 +237,7 @@
 				}
 				vlines.push(vline);
 			}
-			function addHline(var _x1, var _x2, var _y){
+			function addHline( _x1, _x2, _y){
 				var hline = new Object();
 				if(_x1 <= _x2){
 					hline.x1 = _x1;
@@ -230,7 +251,7 @@
 				
 				hlines.push(hline);
 			}
-			boolean checkVlineCollision(var vline, var _x, var _y, var radius){ // return true if collision
+			boolean checkVlineCollision( vline,  _x,  _y,  radius){ // return true if collision
 				if(_y <= vline.y1){
 					if(radius < distance(_x, _y, vline.x, vline.y1))	return false;
 					return true;
@@ -244,7 +265,7 @@
 					return true;
 				}
 			}
-			boolean checkHlineCollision(var hline, var _x, var _y, var radius){
+			boolean checkHlineCollision( hline,  _x,  _y,  radius){
 				if(_x <= hline.x1){
 					if(radius < distance(_x, _y, hline.x1, hline.y))	return false;
 					return true;
@@ -258,7 +279,7 @@
 					return true;
 				}
 			}
-			double distance(var x1, var y1, var x2, var y2){
+			double distance( x1,  y1,  x2,  y2){
 				return Math.pow(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2), 0.5);
 			}
         </script>  
