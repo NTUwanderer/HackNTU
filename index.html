@@ -10,11 +10,14 @@
 				'detail': "@"+inputUID
 			});
 			window.dispatchEvent(userid);
-			var DataString ;				
+			var DataString, tbrID="";				
 			function GETDATA(str){
 					console.log("GETDATA started.");
 					DataString = str;
 					console.log(str);
+			}
+			function RMID(str){
+				tbrID=str;
 			}
 		</script>	
 	       <script type="text/processing" data-processing-target="mycanvas">
@@ -103,7 +106,10 @@
 							addPlayer(parseInt(obj[i].x), parseInt(obj[i].y), obj[i].id);
 						}
 					}
-					
+					if(tbrID!=""){
+						removePlayer(tbrID);
+					}
+					tbrID="";
 				}
 				background(200, 200, 200);
 				var temp = jQuery.inArray(myId, ids);
