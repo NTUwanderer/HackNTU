@@ -58,14 +58,7 @@
 				addPlayer(parseInt(x), parseInt(y), id);
 			}
 
-/*			function getData(str){
-				console.log("getData started.");
-				var arr = JSON.parse(str);
-				for(int i = 0; i < arr.length; i++){
-					addPlayer(arr[i].xpos, arr[i].ypos, arr[i].name);
-				}
-			}
-*/			function addPlayer(_x, _y, _id){
+			function addPlayer(_x, _y, _id){
 				var player = new Object();
 				player.x = _x;
 				player.y = _y;
@@ -77,7 +70,6 @@
 		
 			
             void setup(){
-            	//size( window.innerWidth*0.97, window.innerHeight*0.80 );
             	sleep(2000);
 				console.log("DataString: "+DataString);
 				size(sizeX, sizeY);
@@ -85,9 +77,6 @@
             	frameRate( 15 );
             	X = sizeX / 2;
             	Y = sizeY / 2;
-				
-				
-				//addPlayer(X, Y, myId);
 				
 				addVline(100, 200, 600);
 				addVline(1100, 200, 600);
@@ -164,10 +153,8 @@
 					
 					fill( 0, 121, 184 );
 			  
-					// Set stroke-color white
 					stroke(255); 
 			  
-					// Draw circle
 					ellipse( tempX, tempY, radius, radius );
 					
 					PFont font;
@@ -185,14 +172,12 @@
             window.addEventListener("keyup", keysReleased, false);            
              
             function keysPressed(e) {
-                // store an entry for every key pressed
                 if(e.keyCode > 36 && e.keyCode < 41)
             		keys[e.keyCode - 37] = true;
                 if(e.keyCode == 13)	enterPressed();
             }
              
             function keysReleased(e) {
-                // mark keys that were released
 				if(e.keyCode > 36 && e.keyCode < 41)
 					keys[e.keyCode - 37] = false;
             }
