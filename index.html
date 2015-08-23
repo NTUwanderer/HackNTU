@@ -24,12 +24,12 @@
 			}
 		</script>	
 	       <script type="text/processing" data-processing-target="mycanvas">
-    		float radius = 50.0;
+    		float radius = 40.0;
             int X, Y;
             int delay = 16;
 			boolean first = true;
             boolean keys = [false, false, false, false]; // left, up, right, down
-			var myId;
+			var myId = "";
 			console.log("AAAAA "+myId);
 			var sizeX = 1200, sizeY = 800;
 			
@@ -163,13 +163,13 @@
 					fill( 0, 121, 184 );
 			  
 					stroke(255); 
-			  
+			 		var radiuss = radius + 10 + sin(frameCount / 4); 
 					ellipse( tempX, tempY, radius, radius );
 					
 					PFont font;
 					font = loadFont("FFScala.ttf"); 
 					textFont(font); 
-					text("position: " + players[i].x + "," + players[i].y, tempX, tempY + 50); 
+					text("id: " + players[i].id, tempX, tempY - 50); 
 				}
 				
 				var BACK = new CustomEvent("Mes",{
