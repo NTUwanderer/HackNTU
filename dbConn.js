@@ -9,7 +9,7 @@ function getConn(){
 	});
 
 	db.connect();
-	console.log('dbConn start');
+	//console.log('dbConn start');
 	return db;
 }
 

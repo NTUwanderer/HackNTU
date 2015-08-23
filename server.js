@@ -20,18 +20,21 @@ var server = ws.createServer(function (connection){
     console.log("Test for connect!")
     
 	connection.on("text",function(str){
-    console.log(str);
+    //console.log(str);
 	var x=200,y=200;
 	if(str[0]=="@"){
 		console.log("send id");
 		var sql = 'INSERT INTO playerInfo SET name= "'+str+'" ,xpos='+x+' ,ypos='+y;
-		mysql.getInsert(sql);
+		//mysql.getInsert(sql);
+		var db = mysql.getConn();
+		db.query(sql, function(err) {
+			if(err) console.log('mysql getInsert error');
+		});
 		y += 20;
 		var sql = 'SELECT * FROM playerInfo ORDER BY id DESC LIMIT 1';
-		var db = mysql.getConn();
 		db.query(sql, function(err, results) {
 			if(err) console.log('mysql getQuery error');
-			console.log(results);
+			//console.log(results);
 			var tok = [];
 			tok.push({
 				"id" : results[0].id.toString(),
@@ -59,11 +62,11 @@ var server = ws.createServer(function (connection){
 			i++
 		}
 		lasCon[parseInt(id)] = new Date().getTime();
-		console.log(lasCon[parseInt(id)]);
+		//console.log(lasCon[parseInt(id)]);
 		var sql = 'UPDATE playerInfo SET xpos='+parseInt(x)+', ypos='+parseInt(y)+' WHERE id='+parseInt(id);
 		mysql.getUpdate(sql);
 
-		console.log("Transfering " + str);
+		//console.log("Transfering " + str);
 		var sql = 'SELECT * FROM playerInfo';
 		var db = mysql.getConn();
 		db.query(sql, function(err, results) {
