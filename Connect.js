@@ -1,10 +1,17 @@
-var MyID
+var MyID;
+var my;
+var flag = true;
 var connection = new WebSocket("ws://"+window.location.hostname+":8000");
 connection.onopen = function(){
     console.log("Connection opened");
     window.addEventListener("Mes", function(event){
         console.log("Get message!");
-        connection.send(event.detail);
+		if(event.detail[0]=="&"){
+        	connection.send(event.detail);
+		}
+		else{
+        	connection.send(event.detail);
+		}
     });
     connection.onmessage = function(e){
 		MyID = e.data;
@@ -13,10 +20,13 @@ connection.onopen = function(){
 			GETDATA(e.data);
 		}
 		else if(e.data[0]=="&"){
-			GETMESSAGE(e.data);
+			GETMESSAGE(e.data.slice(1));
 		}
 		else{
 			RMID(e.data);
+			var obj = JSON.parse(e.data);
+			my = odj[0].id;
+			console.log("my is "+ my);
 		}
     }
     connection.onclose = function(){
