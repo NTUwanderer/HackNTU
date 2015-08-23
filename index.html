@@ -10,7 +10,7 @@
 				'detail': "@"+inputUID
 			});
 			window.dispatchEvent(userid);
-			var DataString, tbrID="";				
+			var DataString, tbrID = "";				
 			function GETDATA(str){
 					console.log("GETDATA started.");
 					DataString = str;
@@ -18,6 +18,9 @@
 			}
 			function RMID(str){
 				tbrID=str;
+			}
+			function GETMESSAGE(str){
+				document.getElementById("getmessage").value+=str;
 			}
 		</script>	
 	       <script type="text/processing" data-processing-target="mycanvas">
@@ -283,6 +286,7 @@
         <!-- <script type="text/javascript" src="FB.js"></script> --!>
 	<script type="text/javascript" src="UI/jquery-2.1.4.min.js"></script>
         <script type="text/javascript" src="UI/materialize.min.js"></script>
+	    <textarea id="getmessage" rows="4" cols="10"></textarea> 	
 		<div class="row">
 			<form class="col s12">
 				<div class="row">
