@@ -1,6 +1,6 @@
 function enterPressed(){
     var message = new CustomEvent("Mes",{
-        'detail': document.getElementById("message").value
+        'detail': "&"+document.getElementById("message").value
     });
     console.log("enterPressed!");
     window.dispatchEvent(message);

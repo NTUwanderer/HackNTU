@@ -12,6 +12,9 @@ connection.onopen = function(){
 		if(e.data[0]=="["){
 			GETDATA(e.data);
 		}
+		else if(e.data[0]=="&"){
+			GETMESSAGE(e.data);
+		}
 		else{
 			RMID(e.data);
 		}
