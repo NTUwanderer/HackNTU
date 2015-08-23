@@ -94,9 +94,13 @@ var server = ws.createServer(function (connection){
 			}	
 		}
 	}
+	else if(str[0]=="&"){
+		broadCast(str);
+	}
     })
     connection.on("close",function (code, reason){
 	})
+	
 })
 server.listen(8000)
 
