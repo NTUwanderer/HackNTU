@@ -87,8 +87,8 @@ var server = ws.createServer(function (connection){
 		if(count%100==0){
 			console.log("100 GET!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			for(var i = 0; i<2000 ; i++){
-				if(lasCon[i]!= -1 && ( new Date().getTime()) - lasCon[i] > 500){
-					console.log( i.toString() +" is disconnected! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+				if(lasCon[i]!= -1 && ( new Date().getTime()) - lasCon[i] > 2000){
+					console.log( i.toString() +" is disconnected!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 					var sql = 'DELETE FROM playerInfo WHERE id='+i;
 					mysql.getDelete(sql);
 					lasCon[i] = -1;
